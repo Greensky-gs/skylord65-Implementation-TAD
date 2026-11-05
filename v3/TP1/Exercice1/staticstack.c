@@ -1,7 +1,7 @@
 #include "stack.h"
 #include <assert.h>
 #include <stdlib.h>
-#define STACK_SIZE 16
+#define STACK_SIZE 100
 
 /** Full definition of the s_stack structure */
 struct s_stack {
