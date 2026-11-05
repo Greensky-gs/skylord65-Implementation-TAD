@@ -43,8 +43,8 @@ jobs:
       - name: Test TP1 - Exercice 1
         run: |
           cd v3/TP1/Exercice1
-          ./stack_ex1 ../../Test/testfile1.txt
-          ./stack_ex1 ../../Test/testfile2.txt
+          ./stack_ex1 ../Test/testfile1.txt
+          ./stack_ex1 ../Test/testfile2.txt
 
       - name: Build TP1 - Exercice 2
         run: |
