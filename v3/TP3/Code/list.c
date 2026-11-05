@@ -201,17 +201,9 @@ List* list_map(List* l, ListFunctor f, void* environment) {
 SubList list_split(SubList l) {
 	LinkedElement* p = l.head;
 	LinkedElement* pp = l.head;
-	int i = 0;
-	bool isOdd = true;
-	while (p!=l.tail) {
-		i++;
-		p = p->next;
-		if(!isOdd) {
-			pp = pp->next;
-			isOdd = true;
-		} else {
-			isOdd = false;
-		}
+	while (p!=l.tail && p->next!=l.tail) {
+		p = p->next->next;
+		pp = pp->next;
 	}
 	l.head = pp;
 	l.tail = pp->next;
@@ -221,42 +213,38 @@ SubList list_split(SubList l) {
 /*-----------------------------------------------------------------*/
 
 SubList list_merge(SubList leftlist, SubList rightlist, OrderFunctor f) {
+	LinkedElement* beforelist = leftlist.head->previous;
+	LinkedElement* lastmoved = beforelist;
+	LinkedElement* afterlist = rightlist.tail->next;
 	LinkedElement* p1 = leftlist.head;
 	LinkedElement* p2 = rightlist.head;
-	bool isleftfirst;
-	int i = 0;
-	while (p1!=leftlist.tail && p2!=rightlist.tail) {
-		LinkedElement* temp1 = p1->next;
-		LinkedElement* temp2 = p2->next;
+	while (p1!=rightlist.head && p2!=rightlist.tail->next) {
+		LinkedElement* temp;
 		if(f(p1->value, p2->value)) {
-			if(i==0) isleftfirst=true;
-			p1->next = p2;
-			p2->next = temp1;
-			temp2->previous = p2->previous;
-			p2->previous = p1;
-			temp1->previous = p2;
+			temp = p1;
+			p1 = p1->next;
 		} else {
-			if(i==0) isleftfirst=false;
-			LinkedElement* temp = p1->previous;
-			p1->previous = p2;
-			p2->next = p1;
-			temp2->previous = p2->previous;
-			p2->previous = temp;
-			temp1->previous = p2;
+			temp = p2;
+			p2 = p2->next;
 		}
-		p1 = temp1;
-		p2 = temp2;
-		i++;
+		lastmoved->next = temp;
+		temp->previous = lastmoved;
+		lastmoved = temp;
 	}
-	LinkedElement* p = isleftfirst?leftlist.head:rightlist.head;
+	if(p1!=rightlist.head) {
+		lastmoved->next = p1;
+		p1->previous = lastmoved;
+		lastmoved = leftlist.tail;
+	} else if (p2!=rightlist.tail->next) {
+		lastmoved->next = p2;
+		p2->previous = lastmoved;
+		lastmoved = rightlist.tail;
+	}
+	lastmoved->next = afterlist;
+	afterlist->previous = lastmoved;
 	SubList l;
-	l.head = p;
-	int j = 0;
-	while (j<i) {
-		p = p->next;
-		j++;
-	}
-	l.tail = p;
+	l.head = beforelist->next;
+	l.tail = lastmoved;
 	return l;
 }
 /*-----------------------------------------------------------------*/
