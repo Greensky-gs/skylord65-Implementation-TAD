@@ -1,27 +1,43 @@
-CC=gcc
-CFLAGS=-std=c99 -Wextra -Wall -Werror -pedantic 
-LDFLAGS=
-
-
-ECHO=@
+# Specific part of the Makefile
+EXEC = stack_ex1
+# Begin generic part of the Makefile
+CC = gcc
+CFLAGS = -std=c99 -Werror -Wextra -Wall -pedantic
+LDFLAGS =
+SRC = $(wildcard *.c)
+OBJ = $(SRC:.c=.o)
+ECHO = @
 ifeq ($(VERBOSE),1)
-# VERBOSE : when compiling, echo the executed command line
 	ECHO=
 endif
 
-EXEC=stack_ex1
-SRC= $(wildcard *.c)
-OBJ= $(SRC:.c=.o)
+ifeq ($(DEBUG),yes)
+	CFLAGS += -g
+	LDFLAGS =
+else
+	CFLAGS += -O3 -DNDEBUG
+	LDFLAGS =
+endif
 
-all: 
+all:
+ifeq ($(DEBUG),yes)
+	@echo "Generating in debug mode"
+else
+	@echo "Generating in release mode"
+endif
 	@$(MAKE) $(EXEC)
-
-$(EXEC): $(OBJ)
-	$(ECHO)$(CC) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c
 	$(ECHO)$(CC) -o $@ -c $< $(CFLAGS)
 
-staticstack.o : stack.h
-main.o: stack.h
+$(EXEC): $(OBJ)
+	$(ECHO)$(CC) -o $@ $^ $(LDFLAGS)
 
+.PHONY: clean mrproper
+
+clean:
+	$(ECHO)rm -rf *.o
+
+mrproper: clean
+	$(ECHO)rm -rf $(EXEC)
+# End generic part of the makefile

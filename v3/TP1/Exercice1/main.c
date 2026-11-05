@@ -39,6 +39,9 @@ int main(int argc, char **argv){
         int n = readInt(input);
 	for ( int i=0; i<n; ++i ) {
 		int v = readInt(input);
+		if(overflow(theStack)) {
+			return 1;
+		}
 		theStack = push(theStack, v);
 	}
 

@@ -29,7 +29,7 @@ Stack* stack(void) {
  */
 Stack* push(Stack* s, int e) {
 	assert(s != NULL);
-	Element* new = 0;
+	Element* new = malloc(sizeof(Element));
 	new->value = e;
 	new->next = s->top;
 	s->top = new;
