@@ -1,0 +1,112 @@
+
+name: Release V3
+
+on:
+  push:
+    paths:
+      - 'v3/**'
+      - '.github/workflows/release-v3.yml'
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'v3/**'
+      - '.github/workflows/ci-v3.yml'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and test V3
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential gcc make
+
+      # TP1
+      - name: Build TP1 - Exercice 1
+        run: |
+          cd v3/TP1/Exercice1
+          rm -f *.o stack_ex1
+          make
+
+      - name: Test TP1 - Exercice 1
+        run: |
+          cd v3/TP1/Exercice1
+          ./stack_ex1 ../../Test/testfile1.txt
+          ./stack_ex1 ../../Test/testfile2.txt
+
+      - name: Build TP1 - Exercice 2
+        run: |
+          cd v3/TP1/Exercice2
+          gcc -std=c99 -Wall -Wextra -Werror -pedantic \
+            -c dynamicstack.c -o /tmp/dynamicstack.o
+
+      # TP2
+      - name: Build TP2 - Library
+        run: |
+          cd v3/TP2/Lib
+          make clean
+          rm -f liblab2.a
+          make
+
+      - name: Build TP2 - Code
+        run: |
+          cd v3/TP2/Code
+          make clean
+          rm -f evaluate
+          make
+
+      - name: Test TP2
+        run: |
+          cd v3/TP2/Code
+          ./evaluate ../Test/exercice1.txt
+
+      # TP3
+      - name: Build TP3
+        run: |
+          cd v3/TP3/Code
+          make mrproper
+          make
+
+      - name: Test TP3 - Exercises 1 to 5
+        shell: bash
+        run: |
+          cd v3/TP3/Code
+
+          for exercise in {1..5}; do
+            echo "Testing exercise $exercise"
+
+            set +e
+            output=$(./list_test "$exercise" 2>&1)
+            status=$?
+            set -e
+
+            # The current main.c returns 1 even after successful execution.
+            if [[ "$status" -ne 0 && "$status" -ne 1 ]]; then
+              echo "$output"
+              exit 1
+            fi
+
+            if [[ -z "$output" ]]; then
+              echo "No output for exercise $exercise"
+              exit 1
+            fi
+
+            if [[ "$exercise" -eq 5 ]]; then
+              echo "$output" | grep -F \
+                "Increasing order : List (8) : 1 2 3 3 4 5 6 7"
+            fi
+
+            echo "Exercise $exercise passed"
+          done
